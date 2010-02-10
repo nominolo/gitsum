@@ -17,6 +17,12 @@ if there is already one that displays the same directory."
   :group 'git
   :type 'boolean)
 
+(defun utf8-shell-command-on-region (&rest args)
+  (let ((coding-system-for-read 'utf-8-unix)
+	(coding-system-for-write 'utf-8-unix))
+    (apply 'shell-command-on-region args)))
+
+
 (easy-mmode-defmap gitsum-diff-mode-shared-map
   '(("A" . gitsum-amend)
     ("c" . gitsum-commit)
@@ -94,10 +100,10 @@ A numeric argument serves as a repeat count."
 (defun gitsum-commit ()
   "Commit the patch as-is, asking for a commit message."
   (interactive)
-  (shell-command-on-region (point-min) (point-max) "git apply --check --cached")
+  (utf8-shell-command-on-region (point-min) (point-max) "git apply --check --cached")
   (let ((buffer (get-buffer-create "*gitsum-commit*"))
         (dir default-directory))
-    (shell-command-on-region (point-min) (point-max) "(cat; git diff --cached) | git apply --stat" buffer)
+    (utf8-shell-command-on-region (point-min) (point-max) "(git diff --cached && cat) | git apply --stat" buffer)
     (with-current-buffer buffer
       (setq default-directory dir)
       (goto-char (point-min))
@@ -117,7 +123,7 @@ A numeric argument serves as a repeat count."
                           "git log -1 --pretty=oneline --abbrev-commit")
                          0 -1)))
     (when (y-or-n-p (concat "Are you sure you want to amend to " last "? "))
-      (shell-command-on-region (point-min) (point-max) "git apply --cached")
+      (utf8-shell-command-on-region (point-min) (point-max) "git apply --cached")
       (shell-command "git commit --amend -C HEAD")
       (gitsum-refresh))))
 
@@ -138,16 +144,16 @@ A numeric argument serves as a repeat count."
               (format "Are you sure you want to revert these %d hunk(s)? "
                       count)))
         (message "Revert canceled.")
-      (shell-command-on-region (point-min) (point-max) "git apply --reverse")
+      (utf8-shell-command-on-region (point-min) (point-max) "git apply --reverse")
       (gitsum-refresh))))
 
 (defun gitsum-do-commit ()
   "Perform the actual commit using the current buffer as log message."
   (interactive)
   (with-current-buffer log-edit-parent-buffer
-    (shell-command-on-region (point-min) (point-max)
+    (utf8-shell-command-on-region (point-min) (point-max)
                              "git apply --cached"))
-  (shell-command-on-region (point-min) (point-max)
+  (utf8-shell-command-on-region (point-min) (point-max)
                            "git commit -F- --cleanup=strip")
   (with-current-buffer log-edit-parent-buffer
     (gitsum-refresh)))
