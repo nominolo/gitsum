@@ -190,6 +190,7 @@ A numeric argument serves as a repeat count."
       (setq list (cdr list)))
     found))
 
+;;;###autoload
 (defun gitsum ()
   "Entry point into gitsum-diff-mode."
   (interactive)
