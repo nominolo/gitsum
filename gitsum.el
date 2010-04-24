@@ -10,6 +10,8 @@
 ;; 04feb2008  +chris+
 
 (eval-when-compile (require 'cl))
+;; For cd-absolute:
+(require 'files)
 
 (defcustom gitsum-reuse-buffer t
   "Whether `gitsum' should try to reuse an existing buffer
@@ -190,16 +192,27 @@ A numeric argument serves as a repeat count."
       (setq list (cdr list)))
     found))
 
+(defun gitsum-get-top-dir ()
+  "Get the top directory of your Git repository."
+  (with-temp-buffer
+    (unless (zerop (prog1
+                       (call-process "git" nil t nil "rev-parse" "--git-dir")
+                     (kill-backward-chars 1)))
+      (error (buffer-string)))
+    ;; --git-dir returns the absolute path to .git.  We want the
+    ;; directory above that (hopefully, maybe).
+    (expand-file-name ".." (buffer-string))))
+
 ;;;###autoload
 (defun gitsum ()
   "Entry point into gitsum-diff-mode."
   (interactive)
-  (let* ((dir default-directory)
+  (let* ((dir (gitsum-get-top-dir))
          (buffer (or (and gitsum-reuse-buffer (gitsum-find-buffer dir))
                      (generate-new-buffer "*gitsum*"))))
     (switch-to-buffer buffer)
     (gitsum-diff-mode)
-    (set (make-local-variable 'list-buffers-directory) dir)
+    (cd-absolute dir)
     (gitsum-refresh)))
 
 ;; viper compatible
