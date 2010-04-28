@@ -10,8 +10,6 @@
 ;; 04feb2008  +chris+
 
 (eval-when-compile (require 'cl))
-;; For cd-absolute:
-(require 'files)
 
 (defcustom gitsum-reuse-buffer t
   "Whether `gitsum' should try to reuse an existing buffer
