@@ -189,36 +189,16 @@ A numeric argument serves as a repeat count."
       (setq list (cdr list)))
     found))
 
-(defun gitsum (&optional dir)
+(defun gitsum ()
   "Entry point into gitsum-diff-mode."
-  (interactive
-   (let ((repo-root (gitsum-repo-root-dir)))
-     (list (funcall (if (fboundp 'read-directory-name)
-                        'read-directory-name
-                      'read-file-name)
-		    "Directory: " repo-root repo-root))))
-  (let* ((dir (or dir default-directory))
+  (interactive)
+  (let* ((dir default-directory)
          (buffer (or (and gitsum-reuse-buffer (gitsum-find-buffer dir))
                      (generate-new-buffer "*gitsum*"))))
     (switch-to-buffer buffer)
     (gitsum-diff-mode)
     (set (make-local-variable 'list-buffers-directory) dir)
-    (setq default-directory dir)
     (gitsum-refresh)))
-
-(defun gitsum-repo-root-dir (&optional start-dir)
-  "Search upwards for the .git directory.
-If no START-DIR is given, start from `default-directory'."
-  (let ((dir (or start-dir
-		 default-directory
-		 (error "No start directory given"))))
-    (if (car (directory-files dir t ".git$"))
-	dir
-      (let ((next-dir (file-name-directory
-		       (directory-file-name (file-truename dir)))))
-	(unless (or (equal dir next-dir) (null next-dir))
-	  (gitsum-repo-root-dir next-dir))))))
-
 
 ;; viper compatible
 (eval-after-load "viper"
