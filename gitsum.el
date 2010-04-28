@@ -43,7 +43,8 @@ This mode is meant to be activated by `M-x gitsum' or pressing `s' in git-status
   ;; magic...
   (lexical-let ((ro-bind (cons 'buffer-read-only gitsum-diff-mode-shared-map)))
     (add-to-list 'minor-mode-overriding-map-alist ro-bind))
-  (diff-auto-refine-mode nil)
+  (if (functionp 'diff-auto-refine-mode)
+      (diff-auto-refine-mode nil))
   (setq buffer-read-only t))
 
 (define-key gitsum-diff-mode-map (kbd "C-c C-c") 'gitsum-commit)
